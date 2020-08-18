@@ -28,7 +28,7 @@ public class UserServiceImpl implements IUserService {
 	@Transactional
 	public User save(User user) {
 		
-		return userRepository.save(user);
+		return userRepository.saveAndFlush(user);
 	}
 	
 	/**

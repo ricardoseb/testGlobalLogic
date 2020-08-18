@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 /**
  * @author Ricardo Quiroga
  * @version 1.0
@@ -58,6 +60,12 @@ public class Phone {
 
 	public void setcountrycode(String countrycode) {
 		this.countrycode = countrycode;
+	}
+
+	@Override
+	public String toString() {
+		return "Phone [id=" + id + ", number=" + number + ", citycode=" + citycode + ", countrycode=" + countrycode
+				+ "]";
 	}
 	
 	

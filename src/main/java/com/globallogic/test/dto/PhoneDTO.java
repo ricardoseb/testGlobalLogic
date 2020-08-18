@@ -6,16 +6,19 @@ import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @Validated
 public class PhoneDTO implements Serializable {
 
-	@JsonProperty("user number")
+	@JsonProperty("number")
 	private String number;
-	@JsonProperty("user city code")
+	@JsonProperty("citycode")
 	private String citycode;
-	@JsonProperty("user country code")
+	@JsonProperty("countrycode")
 	private String countrycode;
 
+	@ApiModelProperty(example = "1234567")
 	public String getNumber() {
 		return number;
 	}
@@ -23,7 +26,7 @@ public class PhoneDTO implements Serializable {
 	public void setNumber(String number) {
 		this.number = number;
 	}
-
+	@ApiModelProperty(example = "2")
 	public String getCitycode() {
 		return citycode;
 	}
@@ -32,22 +35,25 @@ public class PhoneDTO implements Serializable {
 		this.citycode = citycode;
 	}
 
+	@ApiModelProperty(example = "56")
 	public String getCountrycode() {
 		return countrycode;
 	}
 
-	public void setContrycode(String countrycode) {
+	public void setCountrycode(String countrycode) {
 		this.countrycode = countrycode;
 	}
+	
 
-	@Override
-	public String toString() {
-		return "PhoneDTO [number=" + number + ", citycode=" + citycode + ", contrycode=" + countrycode + "]";
-	}
+	
+
+
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4363949826813121152L;
+
+	
 
 }

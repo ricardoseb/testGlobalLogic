@@ -27,15 +27,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.globallogic.test.dto.PhoneDTO;
 import com.globallogic.test.dto.UserDTO;
 import com.globallogic.test.entity.Phone;
 import com.globallogic.test.entity.User;
-import com.globallogic.test.factory.FactoryUser;
+
 import com.globallogic.test.service.IUserService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 
 
@@ -53,19 +57,24 @@ public class UserRestController {
 
 	@Autowired
 	private IUserService userService;
-	
-	@Autowired
-	FactoryUser factoryUser;
-	
-	
+
+
 	@Value("${secret.key}")
 	private String TOKEN_SECRET;
 
+	@ApiOperation(value = "Create a user", notes = "By passing in the appropriate options, you can create a user ", response = User.class)
+	@ApiResponses(value = { 
+	        @ApiResponse(code = 201, message = "Created", response = User.class),
+	        @ApiResponse(code = 400, message = "bad input parameter"),
+	        @ApiResponse(code = 403, message = "Forbidden"),
+	        @ApiResponse(code = 404, message = "Not Found"),
+	        @ApiResponse(code = 500, message = "Server Error") })
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> create(@Valid @RequestBody User user, BindingResult result) {
-		UserDTO usernew = null;
+	public ResponseEntity<?> create(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
+		User usernew = null;
 		User userEmail = null;
+		User userSaved = null;
 		Date date = null;
 		Map<String, Object> response = new HashMap<>();
 		logger.info("[UserRestController:create] Start - validate request");
@@ -75,34 +84,39 @@ public class UserRestController {
 					.collect(Collectors.toList());
 
 			response.put("mensaje", errors);
-			logger.error("[UserRestController:create] Error: {}",errors);
+			logger.error("[UserRestController:create] Error: {}", errors);
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 
 		try {
-			logger.info("[UserRestController:create] User validate - search user email: {}",user.getEmail());
-			userEmail = userService.findEmail(user.getEmail());
+			logger.info("[UserRestController:create] User validate - search user email: {}", userDTO.getEmail());
+			userEmail = userService.findEmail(userDTO.getEmail());
 			if (userEmail == null) {
 				logger.info("[UserRestController:create] User email not registered - create proccess");
 				date = new Date();
 				SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-				user.setPassword(user.getPassword());
-				user.setCreated(formatter.format(date));
-				user.setLast_login(formatter.format(date));
-				user.setIsactive(true);
-				user.setToken(getJWTToken());
+				usernew = new User();
+				usernew.setName(userDTO.getName());
+				usernew.setEmail(userDTO.getEmail());
+				usernew.setPassword(userDTO.getPassword());
+				usernew.setCreated(formatter.format(date));
+				usernew.setLast_login(formatter.format(date));
+				usernew.setIsactive(true);
+				usernew.setToken(getJWTToken());
 				List<Phone> phones = new ArrayList<Phone>();
-				for (Phone telefonos : user.getPhones()) {
+				for (PhoneDTO telefonos : userDTO.getPhones()) {
 					Phone newphone = new Phone();
 					newphone.setCitycode(telefonos.getCitycode());
-					newphone.setcountrycode(telefonos.getcountrycode());
+					newphone.setcountrycode(telefonos.getCountrycode());
 					newphone.setNumber(telefonos.getNumber());
 					phones.add(newphone);
 				}
-				user.setPhones(phones);
-				userService.save(user);
-				usernew = factoryUser.userDTOFactory(user);
+				usernew.setPhones(phones);
+				logger.info("User to persist: {}", usernew.toString());
+				userSaved = userService.save(usernew);
 				logger.info("[UserRestController:create] End - Created user");
+				return new ResponseEntity<User>(userSaved, HttpStatus.CREATED);
+
 			} else {
 				response.put("mensaje", "El correo ya esta registrado");
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
@@ -112,16 +126,17 @@ public class UserRestController {
 			response.put("mensaje", "Error al realizar el insert en la base de datos");
 			response.put("mensaje", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			
+			usernew = null;
+			userSaved = null;
 		}
-
-		
-		return new ResponseEntity<UserDTO>(usernew, HttpStatus.CREATED);
 
 	}
 
-
 	/**
 	 * Metodo que genera un token
+	 * 
 	 * @return un JWT en formato String
 	 */
 	public String getJWTToken() {

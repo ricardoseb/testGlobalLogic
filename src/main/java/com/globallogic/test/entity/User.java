@@ -15,11 +15,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.validation.constraints.NotEmpty;
+
+
+
 
 /**
  * @author Ricardo Quiroga
@@ -34,19 +34,15 @@ public class User implements Serializable{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@JsonIgnore
 	private Long id;
 	
-	@NotEmpty(message= "no debe estar vacio")
+	
 	@Column(nullable = false)
 	private String name;
-	@NotEmpty
-	@Email(message = "posee formato invalido")
+	
 	@Column(nullable = false)
 	private String email;
-	@NotEmpty
-	@Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9].*[0-9]).{4,}$", 
-	message = "debe tener una mayuscula, letras minúsculas, y dos numeros")
+	
 	@Column(nullable = false)
 	private String password;
 	
@@ -157,6 +153,13 @@ public class User implements Serializable{
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", phones="
+				+ phones + ", created=" + created + ", modified=" + modified + ", last_login=" + last_login + ", token="
+				+ token + ", isactive=" + isactive + "]";
 	}
 
 	

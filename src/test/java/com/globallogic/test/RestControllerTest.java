@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globallogic.test.controller.UserRestController;
 import com.globallogic.test.entity.Phone;
 import com.globallogic.test.entity.User;
-import com.globallogic.test.factory.FactoryUser;
+
 import com.globallogic.test.service.IUserService;
 
 @AutoConfigureMockMvc
@@ -39,8 +39,6 @@ public class RestControllerTest {
 	IUserService iUserService;
 	
 	
-	@MockBean
-	FactoryUser factoryUser;
 	
 	
 	@Test
